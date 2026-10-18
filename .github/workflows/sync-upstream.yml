@@ -1,16 +1,3 @@
--sync upstream/master
-          git push origin upstream-sync --force
-
-                - name: Create pull request
-                        env:
-                                    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                                            run: |
-                                                        gh pr create \
-                                                                    --base main \
-                                                                                --head upstream-sync \
-                                                                                            --title "Sync upstream updates" \
-                                                                                                                                       --body "Updates from alvinunreal/oh-my-opencode-slim." \
-                                                                                                                                                                                                         || echo "PR may already exist"
 
 name: Sync upstream
 
@@ -45,4 +32,16 @@ jobs:
           git remote add upstream \
             https://github.com/alvinunreal/oh-my-opencode-slim.git
           git fetch upstream master
-          git checkout -B upstream
+          git checkout -B upstream-sync upstream/master
+          git push origin upstream-sync --force
+
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --base main \
+            --head upstream-sync \
+            --title "Sync upstream updates" \
+            --body "Updates from alvinunreal/oh-my-opencode-slim." \
+            || echo "PR may already exist"
