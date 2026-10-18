@@ -1,0 +1,48 @@
+-sync upstream/master
+          git push origin upstream-sync --force
+
+                - name: Create pull request
+                        env:
+                                    GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                                            run: |
+                                                        gh pr create \
+                                                                    --base main \
+                                                                                --head upstream-sync \
+                                                                                            --title "Sync upstream updates" \
+                                                                                                                                       --body "Updates from alvinunreal/oh-my-opencode-slim." \
+                                                                                                                                                                                                         || echo "PR may already exist"
+
+name: Sync upstream
+
+on:
+  schedule:
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync upstream branch
+        run: |
+          git remote add upstream \
+            https://github.com/alvinunreal/oh-my-opencode-slim.git
+          git fetch upstream master
+          git checkout -B upstream
